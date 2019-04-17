@@ -32,7 +32,8 @@ export default {
           rule:'basic'
         }
       })
-      this.currentroomid=room.key; 
+      this.currentroomid=room.key;
+      this.$router.push('/game/'+this.currentroomid)
     },
     removeroom(){
       firebase.database().ref('/room/'+this.currentroomid).remove();
