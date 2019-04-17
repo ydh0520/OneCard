@@ -1,18 +1,25 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+   <div>
+     <button @click="make()">wefwef</button>
+   </div>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+import firebase from 'firebase/app'
+import 'firebase/database'
 
 export default {
   name: 'home',
   components: {
-    HelloWorld
+  },
+  methods:{
+    make(){
+      firebase.database().ref('/').set({
+        test:'test4'
+      })
+    }
   }
 }
 </script>
