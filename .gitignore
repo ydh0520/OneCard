@@ -24,3 +24,5 @@ firebase.json
 .firebaserc
 database.rules.json
 /.firebase
+
+/src/config/*
