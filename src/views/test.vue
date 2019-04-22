@@ -2,7 +2,7 @@
 <div>
     <div>
         <button @click="init()">초기화</button>
-        <button v-if="info.ing==0" @click="start()">시작</button>
+        <button v-if="info.ing==0&&playernum==0" @click="start()">시작</button>
         <button v-if="info==''" @click="enter()">참가</button>
         <div></div>
     </div>
@@ -43,18 +43,6 @@ export default {
             player:''
         }
     },
-    watch:{
-        playernum(){
-            var pc=this.playernum
-            firebase.database().ref('/foker/info').update({playercounter:pc});
-            firebase.database().ref('/foker/player').push({
-                pc:{
-                    value:200,
-                    state:0
-                }
-            });
-        }
-    },
     methods:{
         init(){
             var foker=firebase.database().ref('/foker');
@@ -67,6 +55,12 @@ export default {
                         totalprice:0,
                         betting:1,
                         playercounter:1
+                    },
+                    'player':{
+                        0:{
+                            value:200,
+                            state:0
+                        }
                     }
                 }
             );
@@ -80,15 +74,23 @@ export default {
         enter(){
             var foker=firebase.database().ref('/foker');
             var $vm=this;
+            foker.once('value').then(function(snapshot){
+                    $vm.playernum=snapshot.val().info.playercounter;
+                    $vm.makeprofile();
+                }
+            )
             foker.on('value',function(snapshot){
                 var snapshotData=snapshot.val();
                 $vm.info=snapshotData.info;
                 $vm.player=snapshotData.player;
-                $vm.playernum=snapshotData.playercounter+1;
             })
         },
         makeprofile(){
-
+            firebase.database().ref('/foker/player/'+this.playernum).set({
+                value:200,
+                state:0
+            });
+            firebase.database().ref('/foker/info').update({playercounter:this.playernum+1});
         },
         start(){
             firebase.database().ref('/foker/info').update({ing:1});
@@ -112,5 +114,7 @@ export default {
 </script>
 
 <style scoped>
-
+li {
+    list-style-type: none;
+}
 </style>
