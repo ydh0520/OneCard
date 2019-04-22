@@ -40,7 +40,8 @@ export default {
             info:'',
             price:'',
             playernum:'',
-            player:''
+            player:'',
+            myValue:200
         }
     },
     methods:{
@@ -65,6 +66,7 @@ export default {
                 }
             );
             var $vm=this;
+            this.playernum=0;
             foker.on('value',function(snapshot){
                 var snapshotData=snapshot.val();
                 $vm.info=snapshotData.info;
@@ -96,9 +98,22 @@ export default {
             firebase.database().ref('/foker/info').update({ing:1});
         },
         call(){
+            this.myValue-=this.info.betting;
+            this.totalprice+=this.info.betting;
+            firebase.database().ref('/foker/player/'+this.playernum).update({
+                state:0,
+                value:this.myValue
+            })
+            this.next();
         },
         double(){
+            var nextrise=this.playernum;
+            var nextbetting = this.info.betting*=2;
+
+            firebase.database().ref('/foker/info').update({rise:nextrise});
+            firebase.database().ref('/foker/info').update({betting:nextbetting});
             
+            this.call();
         },
         die(){
             
@@ -107,7 +122,8 @@ export default {
 
         },
         next(){
-            
+            let next = (this.info.turn+1)%this.info.playercounter;
+            firebase.database().ref('/foker/info').update({turn:next});
         }
     }
 }
