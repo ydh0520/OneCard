@@ -1,22 +1,28 @@
 <template>
-<div>
-    <div>
-        <button @click="init()">초기화</button>
-        <button v-if="info==''" @click="enter()">참가</button>
+<div class="col-12">
+    <div v-if="info==''" >
+        <h1>배팅 도우미</h1>
+        <div class="row">
+            <b-button @click="init()" variant="success" class="col-5 ml-auto mr-auto">만들기</b-button>
+            <b-button @click="enter()" variant="primary" class="col-5 ml-auto mr-auto">참가</b-button>
+        </div>
         <div></div>
     </div>
     <div v-if="info.ing==0">
-        <h3>참가자</h3>
-        
-        <li v-for="(item,index) in player" :key="index">
-            player {{index}}
-        </li>
-
-        <button v-if="playernum==0" @click="start()">시작</button>
+        <h1>현재 참가자</h1>
+        <hr>
+        <div>  
+            <li v-for="(item,index) in player" :key="index">
+                player {{index}}
+            </li>
+        </div>
+        <hr>
+        <b-button v-if="playernum==0" variant="danger" @click="start()" class="col-11">시작</b-button>
+        <p v-else>방장이 시작을 누를때까지 기다리세요</p>
     </div>
 
     <div v-if="info.ing==1">
-        <h1>Player : {{playernum}}</h1>
+        <h1>Player{{playernum}}</h1>
         <div>
             <li v-for="(item,index) in player" :key="index" >
                 <p>player {{index}}: {{item.value}}</p>
@@ -26,16 +32,10 @@
             {{game.totalprice}}
         </div>
 
-        <div v-if="game.turn==playernum">
-            <button @click="call()">
-                call
-            </button>
-            <button @click="double()">
-                double
-            </button>
-            <button @click="die()">
-                die
-            </button>
+        <div v-if="game.turn==playernum" class="row">
+            <b-button @click="call()" variant="success" class="col-4 p-1">call</b-button>
+            <b-button @click="double()" variant="danger" class="col-4 p-1">double</b-button>
+            <b-button @click="die()" variant="dark" class="col-4 p-1">die</b-button>
         </div>
 
         <div v-if="game.turn==game.rise">
@@ -122,11 +122,12 @@ export default {
         },
         call(){
             this.player[this.playernum].value-=this.game.betting;
-
-            var next=(this.game.turn+1)%this.info.playercounter;
+               this.player[this.playernum].state=1;
+            this.next();
             var totalprice=this.game.totalprice+this.game.betting;
-            
+            var next=this.game.turn
             firebase.database().ref('/foker/player/'+this.playernum).update(this.player[this.playernum]);
+            
             firebase.database().ref('/foker/game').update({
                 turn:next,
                 totalprice:totalprice
@@ -137,16 +138,26 @@ export default {
             this.game.betting*=2;
             
             firebase.database().ref('/foker/game').update(this.game)
-
-            this.call();
-        },
-        die(){
-            this.player[this.playernum].state=1;
+            
+            this.player[this.playernum].value-=this.game.betting;
+            this.player[this.playernum].state=2;
+            this.next();
+            var totalprice=this.game.totalprice+this.game.betting;
+            var next=this.game.turn
             firebase.database().ref('/foker/player/'+this.playernum).update(this.player[this.playernum]);
             
-            var next=(this.game.turn+1)%this.info.playercounter;
             firebase.database().ref('/foker/game').update({
-                turn:next
+                turn:next,
+                totalprice:totalprice
+            });
+        },
+        die(){
+            this.player[this.playernum].state=3;
+            firebase.database().ref('/foker/player/'+this.playernum).update(this.player[this.playernum]);
+            
+            this.next();
+            firebase.database().ref('/foker/game').update({
+                turn:this.game.turn
             });
         },
         accept(){
@@ -167,9 +178,11 @@ export default {
             firebase.database().ref('/foker/player').update(this.player);
         },
         next(){
-
-            
-            return 
+            for(let i =0;i<this.info.playercounter;i++){
+                this.game.turn=(this.game.turn+1)%this.info.playercounter;
+                if(this.player[this.game.turn].state!=3)
+                    return;
+            }
         }
     }
 }
@@ -178,5 +191,9 @@ export default {
 <style scoped>
 li {
     list-style-type: none;
+}
+
+h1{
+    font-size: 3.5em
 }
 </style>

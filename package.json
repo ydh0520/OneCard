@@ -7,8 +7,11 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "bootstrap-vue": "^2.0.0-rc.19",
     "core-js": "^2.6.5",
     "firebase": "^5.9.4",
+    "sass": "^1.19.0",
+    "sass-loader": "^7.1.0",
     "vue": "^2.6.10",
     "vue-router": "^3.0.3"
   },
