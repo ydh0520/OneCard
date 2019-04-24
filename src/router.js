@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
 import Game from './views/Game.vue'
-import Foker from './views/test.vue'
+import Poker from './views/test.vue'
 
 Vue.use(Router)
 
@@ -19,9 +19,9 @@ export default new Router({
       component: Game
     },
     {
-      path: '/foker',
+      path: '/Poker',
       name: 'game',
-      component: Foker
+      component: Poker
     }
   ]
 })
