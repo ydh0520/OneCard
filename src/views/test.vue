@@ -2,6 +2,9 @@
 <div class="col-12">
     <div v-if="info==''" >
         <h1>배팅 도우미</h1>
+        <div class="col-10 m-auto">
+            <img id="pokerchip" src="@/assets/img/pokerchip.png">
+        </div>
         <div class="row">
             <b-button @click="init()" variant="success" class="col-5 ml-auto mr-auto">만들기</b-button>
             <b-button @click="enter()" variant="primary" class="col-5 ml-auto mr-auto">참가</b-button>
@@ -40,7 +43,7 @@
                     </td>
                     <td style="width:30%">player{{index}}</td>
                     <td style="width:30%">{{item.value}}</td>
-                    <td style="width:30%">{{item.state}}</td>
+                    <td style="width:30%">{{bettingState[item.state]}}</td>
                 </tr>
             </table>
         </div>
@@ -85,6 +88,7 @@ import 'firebase/database'
 export default {
     data(){
         return {
+            bettingState:['',"Call","Double","Die","ALLIN"],
             playernum:'',
             info:'',
             game:'',
@@ -187,9 +191,10 @@ export default {
             firebase.database().ref('/poker/player/'+this.playernum).update(this.player[this.playernum]);
             
             this.next();
-            firebase.database().ref('/poker/game').update({
-                turn:this.game.turn
-            });
+            if(this.game.rise==this.playernum){
+                this.game.rise=this.game.turn
+            }
+            firebase.database().ref('/poker/game').update(this.game);
         },
         accept(){
             let result = this.player[this.playernum].value+=this.game.totalprice;
@@ -211,7 +216,7 @@ export default {
         next(){
             for(let i =0;i<this.info.playercounter;i++){
                 this.game.turn=(this.game.turn+1)%this.info.playercounter;
-                if(this.player[this.game.turn].state!=3)
+                if(this.player[this.game.turn].state<3)
                     return;
             }
         }
@@ -264,5 +269,9 @@ td{
     position: fixed;
     bottom: 0;
     padding: 5px
+}
+
+#pokerchip{
+    width:80%;
 }
 </style>
