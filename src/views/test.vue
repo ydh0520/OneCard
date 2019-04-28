@@ -156,10 +156,16 @@ export default {
             firebase.database().ref('/poker/info').update({ing:1});
         },
         call(){
-            this.player[this.playernum].value-=this.game.betting;
-               this.player[this.playernum].state=1;
+            if(this.player[this.playernum].value>this.game.betting){
+                this.player[this.playernum].value-=this.game.betting;
+                this.player[this.playernum].state=1;
+                var totalprice=this.game.totalprice+this.game.betting;
+            }else{
+                var totalprice=this.game.totalprice+this.player[this.playernum].value;
+                this.player[this.playernum].value=0;
+                this.player[this.playernum].state=4;
+            }
             this.next();
-            var totalprice=this.game.totalprice+this.game.betting;
             var next=this.game.turn
             firebase.database().ref('/poker/player/'+this.playernum).update(this.player[this.playernum]);
             
@@ -173,11 +179,17 @@ export default {
             this.game.betting*=2;
             
             firebase.database().ref('/poker/game').update(this.game)
+            if(this.player[this.playernum].value>this.game.betting){
+                this.player[this.playernum].value-=this.game.betting;
+                this.player[this.playernum].state=2;
+                var totalprice=this.game.totalprice+this.game.betting;
+            }else{
+                var totalprice=this.game.totalprice+this.player[this.playernum].value;
+                this.player[this.playernum].value=0;
+                this.player[this.playernum].state=4;
+            }
             
-            this.player[this.playernum].value-=this.game.betting;
-            this.player[this.playernum].state=2;
             this.next();
-            var totalprice=this.game.totalprice+this.game.betting;
             var next=this.game.turn
             firebase.database().ref('/poker/player/'+this.playernum).update(this.player[this.playernum]);
             
@@ -216,7 +228,7 @@ export default {
         next(){
             for(let i =0;i<this.info.playercounter;i++){
                 this.game.turn=(this.game.turn+1)%this.info.playercounter;
-                if(this.player[this.game.turn].state<3)
+                if(this.player[this.game.turn].state!=3)
                     return;
             }
         }
